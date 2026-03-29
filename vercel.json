@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server/server.js"
+    }
+  ],
+  "env": {
+    "OPENAI_API_KEY": "@OPENAI_API_KEY",
+    "HUGGING_FACE_API_KEY": "@HUGGING_FACE_API_KEY",
+    "STABILITY_API_KEY": "@STABILITY_API_KEY",
+    "NODE_ENV": "production"
+  }
+}

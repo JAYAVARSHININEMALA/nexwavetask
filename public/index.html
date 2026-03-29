@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pear Media - Text & Image Generation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: slideInDown 0.6s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .workflow-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workflow-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .workflow-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .workflow-card h2 span {
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 30px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f5f5f5;
+        }
+
+        .file-upload-label:hover {
+            background: #f0f0ff;
+            border-color: #764ba2;
+        }
+
+        .file-upload-label.dragging {
+            background: #e8e8ff;
+            border-color: #764ba2;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            display: none;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            margin-top: 20px;
+        }
+
+        .results-section h3:first-child {
+            margin-top: 0;
+        }
+
+        .enhanced-text {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .approval-section {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .image-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-title {
+            padding: 10px;
+            background: #f0f0f0;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .analysis-text {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            background: #fee;
+            border-left: 4px solid #f33;
+            padding: 15px;
+            border-radius: 4px;
+            color: #c33;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .workflow-container {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .status-message {
+            padding: 10px 15px;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 4px;
+            color: #2e7d32;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Pear Media</h1>
+            <p>Text & Image Generation Workflow</p>
+        </header>
+
+        <div class="workflow-container">
+            <!-- Text Enhancement Workflow -->
+            <div class="workflow-card">
+                <h2><span>📝</span> Text Enhancement</h2>
+                
+                <div class="form-group">
+                    <label for="textInput">Enter Text Prompt:</label>
+                    <textarea id="textInput" placeholder="e.g., A futuristic city with flying cars..."></textarea>
+                </div>
+
+                <div class="error-message" id="textError"></div>
+                <div class="status-message" id="textStatus"></div>
+
+                <div class="results-section" id="textResults">
+                    <h3>🔄 Enhanced Prompt:</h3>
+                    <div class="enhanced-text" id="enhancedTextDisplay"></div>
+                    
+                    <div class="approval-section">
+                        <button class="btn-primary" id="approveTextBtn" style="display:none;" onclick="approveAndGenerateImages()">✓ Approve & Generate Images</button>
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="enhanceBtn" onclick="enhanceText()" style="width: 100%;">Enhance Text</button>
+            </div>
+
+            <!-- Image Upload Workflow -->
+            <div class="workflow-card">
+                <h2><span>🖼️</span> Image Analysis</h2>
+                
+                <div class="form-group">
+                    <label for="imageInput" class="file-upload-label" id="uploadLabel">
+                        📤 Click to upload or drag image here
+                    </label>
+                    <input type="file" id="imageInput" accept="image/*">
+                </div>
+
+                <div class="error-message" id="imageError"></div>
+                <div class="status-message" id="imageStatus"></div>
+
+                <div class="results-section" id="imageResults">
+                    <h3>📊 Image Analysis:</h3>
+                    <div class="analysis-text" id="analysisDisplay"></div>
+                    
+                    <button class="btn-primary" id="generateVariationsBtn" onclick="generateVariations()" style="display:none; width: 100%; margin-top: 15px;">✨ Generate Variations</button>
+                </div>
+
+                <button class="btn-primary" id="analyzeBtn" onclick="analyzeImage()" style="width: 100%; display: none;">Analyze Image</button>
+            </div>
+        </div>
+
+        <!-- Combined Results -->
+        <div class="workflow-card">
+            <h2>📸 Generated Images</h2>
+            
+            <div id="imagesResultsSection" class="results-section" style="display: none; margin-top: 0; padding: 0;">
+                <div class="images-grid" id="imagesGrid"></div>
+            </div>
+
+            <div id="variationsSection" class="results-section" style="display: none; margin-top: 0; padding: 0;">
+                <h3>Image Variations:</h3>
+                <div class="images-grid" id="variationsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        let currentEnhancedText = '';
+        let currentImageData = null;
+        let currentAnalysis = '';
+
+        // Text Enhancement
+        async function enhanceText() {
+            const textInput = document.getElementById('textInput').value;
+            const errorDiv = document.getElementById('textError');
+            const statusDiv = document.getElementById('textStatus');
+            const btn = document.getElementById('enhanceBtn');
+
+            if (!textInput.trim()) {
+                showError(errorDiv, 'Please enter some text');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Enhancing...';
+            errorDiv.classList.remove('active');
+            statusDiv.innerHTML = 'Analyzing text with AI...';
+            statusDiv.classList.add('active');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/enhance-text`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textInput })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                currentEnhancedText = data.enhancedText;
+                document.getElementById('enhancedTextDisplay').textContent = data.enhancedText;
+                document.getElementById('textResults').classList.add('active');
+                document.getElementById('approveTextBtn').style.display = 'block';
+                
+                statusDiv.innerHTML = '✓ Text enhanced successfully!';
+                statusDiv.classList.add('active');
+
+            } catch (error) {
+                showError(errorDiv, error.message);
+                statusDiv.classList.remove('active');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Enhance Text';
+            }
+        }
+
+        // Approve and Generate Images
+        async function approveAndGenerateImages() {
+            const btn = document.getElementById('approveTextBtn');
+            const statusDiv = document.getElementById('textStatus');
+            const imagesGrid = document.getElementById('imagesGrid');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Generating...';
+            statusDiv.innerHTML = 'Generating images from approved prompt...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-images`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: currentEnhancedText })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                imagesGrid.innerHTML = '';
+                data.images.forEach(img => {
+                    const card = document.createElement('div');
+                    card.className = 'image-card';
+                    card.innerHTML = `
+                        <img src="${img.url}" alt="${img.title}">
+                        <div class="image-title">${img.title}</div>
+                    `;
+                    imagesGrid.appendChild(card);
+                });
+
+                document.getElementById('imagesResultsSection').style.display = 'block';
+                statusDiv.innerHTML = '✓ Images generated successfully!';
+
+            } catch (error) {
+                showError(document.getElementById('textError'), error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '✓ Approve & Generate Images';
+            }
+        }
+
+        // Image Analysis
+        async function analyzeImage() {
+            const errorDiv = document.getElementById('imageError');
+            const statusDiv = document.getElementById('imageStatus');
+            const btn = document.getElementById('analyzeBtn');
+
+            if (!currentImageData) {
+                showError(errorDiv, 'Please upload an image first');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Analyzing...';
+            errorDiv.classList.remove('active');
+            statusDiv.innerHTML = 'Analyzing image with AI vision...';
+            statusDiv.classList.add('active');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze-image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imageData: currentImageData })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                currentAnalysis = data.analysis;
+                document.getElementById('analysisDisplay').textContent = data.analysis;
+                document.getElementById('imageResults').classList.add('active');
+                document.getElementById('generateVariationsBtn').style.display = 'block';
+
+                statusDiv.innerHTML = '✓ Image analyzed successfully!';
+                statusDiv.classList.add('active');
+
+            } catch (error) {
+                showError(errorDiv, error.message);
+                statusDiv.classList.remove('active');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Analyze Image';
+            }
+        }
+
+        // Generate Variations
+        async function generateVariations() {
+            const btn = document.getElementById('generateVariationsBtn');
+            const statusDiv = document.getElementById('imageStatus');
+            const variationsGrid = document.getElementById('variationsGrid');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Generating...';
+            statusDiv.innerHTML = 'Generating image variations...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-variations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ analysis: currentAnalysis, count: 3 })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                variationsGrid.innerHTML = '';
+                data.variations.forEach(variation => {
+                    const card = document.createElement('div');
+                    card.className = 'image-card';
+                    card.innerHTML = `
+                        <img src="${variation.url}" alt="${variation.style}">
+                        <div class="image-title">${variation.style}</div>
+                    `;
+                    variationsGrid.appendChild(card);
+                });
+
+                document.getElementById('variationsSection').style.display = 'block';
+                statusDiv.innerHTML = '✓ Variations generated!';
+
+            } catch (error) {
+                showError(document.getElementById('imageError'), error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '✨ Generate Variations';
+            }
+        }
+
+        // File Upload Handling
+        const imageInput = document.getElementById('imageInput');
+        const uploadLabel = document.getElementById('uploadLabel');
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleImageUpload(file);
+        });
+
+        uploadLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadLabel.classList.add('dragging');
+        });
+
+        uploadLabel.addEventListener('dragleave', () => {
+            uploadLabel.classList.remove('dragging');
+        });
+
+        uploadLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadLabel.classList.remove('dragging');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                imageInput.files = e.dataTransfer.files;
+                handleImageUpload(file);
+            }
+        });
+
+        function handleImageUpload(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImageData = e.target.result;
+                document.getElementById('imageStatus').innerHTML = '✓ Image uploaded successfully!';
+                document.getElementById('imageStatus').classList.add('active');
+                document.getElementById('analyzeBtn').style.display = 'block';
+                document.getElementById('imageError').classList.remove('active');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showError(element, message) {
+            element.textContent = '⚠️ ' + message;
+            element.classList.add('active');
+        }
+
+        // Check server health on load
+        window.addEventListener('load', async () => {
+            try {
+                await fetch(`${API_BASE}/api/health`);
+            } catch (error) {
+                console.log('Server connection check - ensure backend is running');
+            }
+        });
+    </script>
+</body>
+</html>
